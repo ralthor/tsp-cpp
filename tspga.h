@@ -30,7 +30,8 @@ class TSPGA
         pair<int, int> naturalSelection();
         int parentNaturalSelection();
         pair<vector<int>, vector<int> > crossover(pair<int, int> parent);
-        bool mutate(vector<int> &x, double probability = 0.5);
+        vector<int> crossoverNext(pair<int, int> parent, int direction);
+        bool mutate(vector<int> &x, double probability = 0.02);
 
 };
 

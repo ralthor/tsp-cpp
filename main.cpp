@@ -1,7 +1,5 @@
 #include <iostream>
 #include "environment.h"
-//#include "function_minimizer.h"
-//#include "graph.h"
 #include "tspga.h"
 
 #define p push_back
@@ -10,10 +8,12 @@ using namespace std;
 
 int main()
 {
-    Graph g("48.txt");
+//    Graph g("48.txt");
+    Graph g("280.txt");
     cout << g.size() << endl;
-    TSPGA solver(80, 15000, g);
-    vector<int> answer = solver.solve();
+    TSPGA solver(30, 15000, g);
+    vector<int> answer;
+    answer = solver.solve();
     double fitness = solver.fitness(answer, 1);
     cout << fitness << endl;
     showVector(answer);

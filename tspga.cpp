@@ -9,15 +9,13 @@ bool myCompare(const pair<int, double> a, const pair<int, double> b)
     return a.second < b.second;
 }
 
-int iRand(int fmin, int fmax)
+int iRand(int lowest, int highest)
 {
-    double f = (double) rand() / RAND_MAX;
-    int result = (int) (fmin + f * (fmax - fmin) + 0.5);
-    if(result < fmin || result > fmax)
-    {
-        cerr << endl << "Error! iRand result is not in range of " << fmin << ", " << fmax << endl;
-    }
-    return result;
+    int random_integer;
+
+    int range=(highest-lowest)+1;
+    random_integer = lowest + int (range*(rand()/(RAND_MAX + 1.0)));
+    return random_integer;
 }
 
 vector<pair<int, int> > vectorDiff(vector<int> b, vector<int> a)
@@ -49,22 +47,21 @@ TSPGA::TSPGA(unsigned int numberOfPopulation, unsigned int numberOfGenerations, 
 {
     this->g = g;
     this->numberOfGenerations = numberOfGenerations;
-    population = vector<vector<int> >(numberOfPopulation, vector<int>(g.size() - 1));
+    population = vector<vector<int> >(numberOfPopulation, vector<int>(g.size()));
 }
 
 double TSPGA::fitness(vector<int> x, int verbose)
 {
-    double dist = g.distance(0, x[0]);
-    if(verbose) cout << "distances: 0-" << x[0] << "(" << g.distance(0, x[0]) << ")" << ", ";
+    double dist = 0;
     for(unsigned int i = 0; i < x.size() - 1; i++)
     {
         dist += g.distance(x[i], x[i + 1]);
         if(verbose) cout << x[i] << "-" << x[i + 1] << "(" << g.distance(x[i], x[i + 1]) << ")" << ", ";
     }
-    dist += g.distance(x[x.size() - 1], 0);
+    dist += g.distance(x[x.size() - 1], x[0]);
     if(verbose)
     {
-        cout << x[x.size() - 1] << "-0" << "(" << g.distance(x[x.size() - 1], 0) << ")" << ", ";
+        cout << x[x.size() - 1] << "-" << x[0] << "(" << g.distance(x[x.size() - 1], x[0]) << ")" << ", ";
         cout << " --- sum: " << dist;
         cout << endl;
     }
@@ -107,6 +104,13 @@ vector<int> TSPGA::solve()
 //            children.first = population[j * 2];
 //            children.second = population[j * 2 + 1];
 
+//            double m1 = fitness(population[parent.first]);
+//            double m2 = fitness(population[parent.second]);
+//            double k1 = fitness(children.first);
+//            double k2 = fitness(children.second);
+//            if(fgbest > k1 + k2 + m1 + m2)
+//                cout << "hehe";
+
             mutate(children.first);
             mutate(children.second);
             newGeneration.push_back(children.first);
@@ -127,11 +131,11 @@ void TSPGA::firstGeneration()
     srand(time(NULL));
     for(unsigned int i = 0; i < population.size(); i++)
     {
-        for(unsigned int j = 1; j <= population[i].size(); j++)
-            population[i][j - 1] = j;
-        showVector(population[i]);
+        for(unsigned int j = 0; j < population[i].size(); j++)
+            population[i][j] = j;
+//        showVector(population[i]);
         std::random_shuffle(population[i].begin(), population[i].end());
-        showVector(population[i]);;
+//        showVector(population[i]);;
 
     }
     fgbest = -1;
@@ -159,32 +163,112 @@ pair<int, int> TSPGA::naturalSelection()
 
 pair<vector<int>, vector<int> > TSPGA::crossover(pair<int, int> parent)
 {
-    vector<pair<int, int> > diff = vectorDiff(population[parent.second], population[parent.first]);
-    if(diff.size() <= 1)
-    {
-        return make_pair(population[parent.first], population[parent.second]);
-    }
-    unsigned int crosspoint = iRand(1, diff.size() - 1);
-    if(crosspoint <= 0 || crosspoint >= diff.size())
-        crosspoint = 1;
     pair<vector<int>, vector<int> > result;
-    result.first = vectorApplyDiff(population[parent.first], diff, 0, crosspoint);
-    result.second = vectorApplyDiff(population[parent.first], diff, crosspoint);
+    result.first = crossoverNext(parent, 1);
+    result.second = crossoverNext(parent, -1);
     return result;
 }
 
-bool TSPGA::mutate(vector<int> &x, double probability)
+int nextNode(vector<int> &vect, int x)
+{
+    unsigned int position = std::find(vect.begin(), vect.end(), x) - vect.begin();
+    int result;
+    if(position == vect.size() - 1)
+        result = vect[0];
+    else
+        result = vect[position + 1];
+
+    vect.erase(vect.begin() + position);
+
+    return result;
+}
+
+int previousNode(vector<int> &vect, int x)
+{
+    unsigned int position = std::find(vect.begin(), vect.end(), x) - vect.begin();
+    int result;
+    if(position == 0)
+        result = vect[vect.size() - 1];
+    else
+        result = vect[position - 1];
+
+    vect.erase(vect.begin() + position);
+
+    return result;
+}
+
+vector<int> TSPGA::crossoverNext(pair<int, int> parent, int direction)
+{
+    vector<int> result;
+    vector<int> parentX(population[parent.first]);
+    vector<int> parentY(population[parent.second]);
+
+    int candidateX, candidateY;
+    int crosspoint = iRand(0, parentX.size() - 1);
+    int c = parentX[crosspoint];
+    result.push_back(c);
+    while(parentX.size() > 1)
+    {
+        int distX, distY;
+        if(direction == 1)
+        {
+            candidateX = nextNode(parentX, c);
+            candidateY = nextNode(parentY, c);
+            distX = g.distance(c, candidateX);
+            distY = g.distance(c, candidateY);
+        }
+        else
+        {
+            candidateX = previousNode(parentX, c);
+            candidateY = previousNode(parentY, c);
+            distX = g.distance(candidateX, c);
+            distY = g.distance(candidateY, c);
+        }
+        if(distX < distY)
+            c = candidateX;
+        else
+            c = candidateY;
+        result.push_back(c);
+    }
+    return result;
+}
+
+vector<int>mySlice(vector<int> vect, int from, int to)
+{
+  vector<int>::iterator first = vect.begin() + from;
+  vector<int>::iterator last  = vect.begin() + to;
+  return vector<int>(first, last);
+}
+
+vector<int> concat(vector<int> a, vector<int> b)
+{
+    a.insert(a.end(), b.begin(), b.end());
+    return a;
+}
+
+bool TSPGA::mutate(vector<int> &a, double probability)
 {
     if((double) rand() / RAND_MAX > probability)
         return false;
-    int a = (int) iRand(0, x.size() - 1);
-    int b;
+    int m,n;
+    do {
+        m = iRand(0, a.size() / 2);
+        n = iRand(0, a.size() - 1);
+    } while (m>=n);
+    vector<int> s1 = mySlice(a, 0, m);
+    vector<int> s2 = mySlice(a, m, n);
+    vector<int> s3 = mySlice(a, n, a.size());
 
-    do{
-        b = (int) iRand(0, x.size() - 1);
-    }while(b == a);
-
-    iter_swap(x.begin() + a, x.begin() + b);
+    s1 = concat(s2, s1);
+    a = concat(s1, s3);
+//    int a = (int) iRand(0, x.size() - 1);
+//    int b;
+//
+//    do{
+//        b = (int) iRand(0, x.size() - 1);
+//    }while(b == a);
+//
+//    iter_swap(x.begin() + a, x.begin() + b);
     return true;
 }
 

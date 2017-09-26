@@ -1,4 +1,5 @@
 *.txt
+*.xml
 tsp-pos
 .svn*
 *.suo
