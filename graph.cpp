@@ -5,6 +5,8 @@
 
 #include "graph.h"
 
+#define MY_BIG_INT 100000000
+
 Graph::Graph()
 {
     //ctor
@@ -44,8 +46,14 @@ Graph::~Graph()
 
 int Graph::distance(int a, int b)
 {
+    if(a <= 0 && b <= 0)
+        return MY_BIG_INT;
+    if(a < 0)
+        a = 0;
+    if(b < 0)
+        b = 0;
     if(a >= dist.size() || b >= dist[0].size())
-        return INT_MAX;
+        return MY_BIG_INT;
     return dist[a][b];
 }
 

@@ -4,11 +4,6 @@
 #include<iostream>
 #include<time.h>
 
-bool myCompare(const pair<int, double> a, const pair<int, double> b)
-{
-    return a.second < b.second;
-}
-
 int iRand(int lowest, int highest)
 {
     int random_integer;
@@ -18,53 +13,60 @@ int iRand(int lowest, int highest)
     return random_integer;
 }
 
-vector<pair<int, int> > vectorDiff(vector<int> b, vector<int> a)
-{
-    vector<pair<int, int> > result;
-    vector<int> c = a;
-    for(unsigned int i = 0; i < b.size(); i++)
-    {
-        unsigned int j = find(c.begin(), c.end(), b[i]) - c.begin();
-        if(i == j)
-            continue;
-        result.push_back(make_pair(i, j));
-        iter_swap(c.begin() + i, c.begin() + j);
-    }
-    return result;
-}
-
-vector<int> vectorApplyDiff(vector<int> a, vector<pair<int, int> > diff, int startIndex, int endIndex)
-{
-    if(endIndex == -1)
-        endIndex = diff.size();
-
-    for(int i = startIndex; i < endIndex; i++)
-        iter_swap(a.begin() + diff[i].first, a.begin() + diff[i].second);
-    return a;
-}
-
-TSPGA::TSPGA(unsigned int numberOfPopulation, unsigned int numberOfGenerations, Graph g)
+TSPGA::TSPGA(unsigned int numberOfPopulation, unsigned int numberOfGenerations, Graph g, int numberOfSalesmen)
 {
     this->g = g;
     this->numberOfGenerations = numberOfGenerations;
-    population = vector<vector<int> >(numberOfPopulation, vector<int>(g.size()));
+    population = vector<vector<int> >(numberOfPopulation, vector<int>(g.size() + numberOfSalesmen - 1));
+    this->numberOfSalesmen = numberOfSalesmen;
+}
+
+int nextIndex(vector<int> &vect, unsigned int idx)
+{
+    return idx + 1 < vect.size() ? idx + 1 : 0;
+}
+
+vector<double> subFitness(vector<int> x, Graph g)
+{
+        vector<double> result;
+        unsigned int firstDepotIndex = -1;
+        for(unsigned int i=0; i < x.size(); i++)
+            if(x[i] <= 0)
+            {
+                firstDepotIndex = i;
+                break;
+            }
+
+        result.push_back(0);
+        for(unsigned int i = firstDepotIndex, k = 0; k <= x.size(); k++, i = nextIndex(x, i))
+        {
+            if(x[i] <= 0 && i != firstDepotIndex)
+                result.push_back(0);
+            result[result.size() - 1] += g.distance(x[i], x[nextIndex(x, i)]);
+        }
+        return result;
 }
 
 double TSPGA::fitness(vector<int> x, int verbose)
 {
     double dist = 0;
-    for(unsigned int i = 0; i < x.size() - 1; i++)
-    {
-        dist += g.distance(x[i], x[i + 1]);
-        if(verbose) cout << x[i] << "-" << x[i + 1] << "(" << g.distance(x[i], x[i + 1]) << ")" << ", ";
-    }
-    dist += g.distance(x[x.size() - 1], x[0]);
-    if(verbose)
-    {
-        cout << x[x.size() - 1] << "-" << x[0] << "(" << g.distance(x[x.size() - 1], x[0]) << ")" << ", ";
-        cout << " --- sum: " << dist;
-        cout << endl;
-    }
+//    for(unsigned int i = 0; i < x.size(); i++)
+//    {
+//        dist += g.distance(x[i], x[nextIndex(x, i)]);
+//        if(verbose)
+//            cout << x[i] << "-" << x[nextIndex(x, i)] << "("
+//                << g.distance(x[i], x[nextIndex(x, i)]) << ")" << ", ";
+//    }
+//    if(verbose)
+//    {
+//        cout << " --- sum: " << dist;
+//        cout << endl;
+//    }
+    vector<double> subFitnesses = subFitness(x, g);
+    dist = -1;
+    for(int i = 0; i < subFitnesses.size(); i++)
+        if(dist < subFitnesses[i])
+            dist = subFitnesses[i];
     return dist;
 }
 
@@ -79,7 +81,7 @@ void TSPGA::calculateFitnesses()
         sumFitness += 1000000 / f;
         if(f < fgbest || fgbest == -1)
         {
-            f = fitness(population[i], 1);
+            //f = fitness(population[i], 1);
             fgbest = f;
             gbest = vector<int>(population[i]);
             cout << "fgbest is changed:" << fgbest << endl;
@@ -132,10 +134,15 @@ void TSPGA::firstGeneration()
     for(unsigned int i = 0; i < population.size(); i++)
     {
         for(unsigned int j = 0; j < population[i].size(); j++)
-            population[i][j] = j;
-//        showVector(population[i]);
+        {
+            int node = j;
+            if(node >= g.size())
+                node = g.size() - node - 1;
+            population[i][j] = node;
+        }
+        showVector(population[i]);
         std::random_shuffle(population[i].begin(), population[i].end());
-//        showVector(population[i]);;
+        showVector(population[i]);;
 
     }
     fgbest = -1;

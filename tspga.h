@@ -12,7 +12,7 @@ void showVector(vector<int> v, string name = "");
 class TSPGA
 {
     public:
-        TSPGA(unsigned int numberOfPopulation, unsigned int numberOfGenerations, Graph g);
+        TSPGA(unsigned int numberOfPopulation, unsigned int numberOfGenerations, Graph g, int numberOfSalesmen = 1);
         double fitness(vector<int> x, int verbose = 0);
         vector<int> solve();
 
@@ -32,6 +32,7 @@ class TSPGA
         pair<vector<int>, vector<int> > crossover(pair<int, int> parent);
         vector<int> crossoverNext(pair<int, int> parent, int direction);
         bool mutate(vector<int> &x, double probability = 0.02);
+        int numberOfSalesmen;
 
 };
 
