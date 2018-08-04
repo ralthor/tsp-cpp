@@ -1,8 +1,8 @@
 # Traveling Salesman Problem Solver using Genteic Algorithm
 
+
 ## Genetic Solver
+The `tspga.h` is the header required for the genetic solver. It accepts a file name e.g. `48.txt` and returns the solution: a sequence of node indices that must be visited. The total distance travelled in the solution is tried to be minimized.
 
-## POS Solver
-In addition to the genetic solver, the source contains a POS (Particle Swarm Optimization) solver.
-
-I know it is not the way of developing things, but this project was a brainstorming for me. I was asked to solve the problem and I was trying everything. I hope I separate these two solvers in the near future.
+## Ungoing project
+Although the current solution is not implelmented in template format, the future plan is to make it more general. Some extra files in the project is created for this purpose. However, it is not done because of a hard deadline for reaching the solution for the TSP. 
