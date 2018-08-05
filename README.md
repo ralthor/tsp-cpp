@@ -6,3 +6,6 @@ The `tspga.h` is the header required for the genetic solver. It accepts a file n
 
 ## Ungoing project
 Although the current solution is not implelmented in template format, the future plan is to make it more general. Some extra files in the project is created for this purpose. However, it is not done because of a hard deadline for reaching the solution for the TSP. 
+
+## Compile and run
+The current compile and run can be done inside the Codeblocks (via tsp-pos.cbp codeblocks project file). I am going to change this to a makefile.
