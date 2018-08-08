@@ -50,21 +50,9 @@ vector<double> subFitness(vector<int> x, Graph g)
 double TSPGA::fitness(vector<int> x, int verbose)
 {
     double dist = 0;
-//    for(unsigned int i = 0; i < x.size(); i++)
-//    {
-//        dist += g.distance(x[i], x[nextIndex(x, i)]);
-//        if(verbose)
-//            cout << x[i] << "-" << x[nextIndex(x, i)] << "("
-//                << g.distance(x[i], x[nextIndex(x, i)]) << ")" << ", ";
-//    }
-//    if(verbose)
-//    {
-//        cout << " --- sum: " << dist;
-//        cout << endl;
-//    }
     vector<double> subFitnesses = subFitness(x, g);
     dist = -1;
-    for(int i = 0; i < subFitnesses.size(); i++)
+    for(unsigned int i = 0; i < subFitnesses.size(); i++)
         if(dist < subFitnesses[i])
             dist = subFitnesses[i];
     return dist;
@@ -88,7 +76,6 @@ void TSPGA::calculateFitnesses()
             showVector(gbest);
         }
     }
-    //std::sort(fitnesses.begin(), fitnesses.end(), myCompare);
 }
 
 vector<int> TSPGA::solve()
@@ -103,15 +90,6 @@ vector<int> TSPGA::solve()
             pair<int, int> parent = naturalSelection();
             pair<vector<int>, vector<int> > children;
             children = crossover(parent);
-//            children.first = population[j * 2];
-//            children.second = population[j * 2 + 1];
-
-//            double m1 = fitness(population[parent.first]);
-//            double m2 = fitness(population[parent.second]);
-//            double k1 = fitness(children.first);
-//            double k2 = fitness(children.second);
-//            if(fgbest > k1 + k2 + m1 + m2)
-//                cout << "hehe";
 
             mutate(children.first);
             mutate(children.second);

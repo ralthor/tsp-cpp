@@ -8,8 +8,7 @@ using namespace std;
 
 int main()
 {
-    MyGraph g("48.txt");
-//    Graph g("280.txt");
+    Graph g("48.txt");
     cout << g.size() << endl;
     TSPGA solver(36, 18000, g, 3);
     vector<int> answer;
