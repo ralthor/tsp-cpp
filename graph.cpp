@@ -44,7 +44,7 @@ Graph::~Graph()
     //dtor
 }
 
-int Graph::distance(int a, int b)
+int Graph::distance(unsigned int a, unsigned int b)
 {
     if(a <= 0 && b <= 0)
         return MY_BIG_INT;

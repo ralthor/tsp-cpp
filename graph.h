@@ -14,7 +14,7 @@ class Graph
         Graph(int n);
         Graph(string filename);
         ~Graph();
-        int distance(int a, int b);
+        int distance(unsigned int a, unsigned int b);
         int size();
 
     private:
