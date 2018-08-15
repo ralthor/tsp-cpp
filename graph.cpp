@@ -28,7 +28,7 @@ Graph::Graph(string filename)
     {
         int node, x, y;
         fin >> node >> x >> y;
-        coord.push_back(make_pair<int, int>(x, y));
+        coord.push_back(make_pair<int&, int&>(x, y));
     }
     fin.close();
     for(int i = 0; i < n; i++)

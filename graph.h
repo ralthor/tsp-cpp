@@ -2,6 +2,7 @@
 #define MY_GRAPH_H
 
 #include <vector>
+#include <string>
 
 using namespace std;
 
